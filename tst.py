@@ -7,7 +7,7 @@ import csv
 import time
 from sklearn.metrics import mean_squared_error
 
-
+# Function to save list to CSV
 def csvSave(file_path, listName):
     # Open the file in write mode
     with open(file_path, 'w', newline='') as file:
@@ -101,7 +101,7 @@ motion_vectors_NNMP = []
 motion_vectors_full_search = []
 
 # Process the frames
-for i in range(len(frames)//20 - 1):
+for i in range(len(frames) - 1):
 
     # Convolve the frames with the kernel
     Rf1 = convolve2d(frames[i], K, mode='same')
@@ -184,7 +184,9 @@ plt.bar(directions, counts)
 plt.title('Direction of Motion')
 plt.xlabel('Direction')
 plt.ylabel('Number of Frames')
+plt.savefig('DirectionOfMotion.png')
 plt.show()
+
 
 # Create a line plot for motion magnitudes
 # This plot shows the magnitude of the motion vector over time.
@@ -192,7 +194,9 @@ plt.plot(range(len(magnitudes)), magnitudes)
 plt.title('Magnitude of Motion Over Time')
 plt.xlabel('Frame Number')
 plt.ylabel('Magnitude of Motion')
+plt.savefig('MagnitudeOfMotionOverTime.png')
 plt.show()
+
 
 # Print the average magnitude of motion
 # This is the average magnitude of the motion vectors for all frames.
@@ -210,16 +214,16 @@ plt.plot(range(len(time_diff)), time_diff)
 plt.title('Time Difference Over Frames')
 plt.xlabel('Frame Number')
 plt.ylabel('Time Difference (seconds)')
+plt.savefig('TimeDifferenceOverFrames.png')
 plt.show()
 
 plt.plot(range(len(MSE_list)), MSE_list)
 plt.title('MSE Over Frames')
 plt.xlabel('Frame Number')
 plt.ylabel('Mean Squared Error')
+plt.savefig('MSEOverFrames.png')
 plt.show()
 
-
 csvSave('magnitudes.csv',magnitudes)
-# When done, destroy the windows
-cv2.destroyAllWindows()
+
 
