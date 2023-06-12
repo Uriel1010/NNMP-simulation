@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import csv
 import time
 from sklearn.metrics import mean_squared_error
+from skimage.metrics import peak_signal_noise_ratio as psnr
+
 
 # Function to save list to CSV
 def csvSave(file_path, listName):
@@ -101,7 +103,7 @@ motion_vectors_NNMP = []
 motion_vectors_full_search = []
 
 # Process the frames
-for i in range(len(frames) - 1):
+for i in range(len(frames)//20 - 1):
 
     # Convolve the frames with the kernel
     Rf1 = convolve2d(frames[i], K, mode='same')
@@ -224,6 +226,37 @@ plt.ylabel('Mean Squared Error')
 plt.savefig('MSEOverFrames.png')
 plt.show()
 
+# Assume that each motion vector is a pixel value in our generated images
+mv_image_NNMP = np.array(motion_vectors_NNMP, dtype=np.float64)
+mv_image_FS = np.array(motion_vectors_full_search, dtype=np.float64)
+original_image = np.array(frames[:-1], dtype=np.float64)
+
+mv_image_NNMP_resized = cv2.resize(mv_image_NNMP, (original_image.shape[2], original_image.shape[1]), interpolation = cv2.INTER_AREA)
+mv_image_FS_resized = cv2.resize(mv_image_FS, (original_image.shape[2], original_image.shape[1]), interpolation = cv2.INTER_AREA)
+
+psnr_NNMP_list = []
+psnr_FS_list = []
+
+for i in range(original_image.shape[0]):
+    psnr_NNMP_list.append(psnr(original_image[i], mv_image_NNMP_resized, data_range=255))
+    psnr_FS_list.append(psnr(original_image[i], mv_image_FS_resized, data_range=255))
+
+# Then you can calculate the average PSNR for each method
+psnr_NNMP = np.mean(psnr_NNMP_list)
+psnr_FS = np.mean(psnr_FS_list)
+
+print(f"PSNR for NNMP: {psnr_NNMP}")
+print(f"PSNR for Full Search: {psnr_FS}")
+
+# Plotting the comparison
+labels = ['NNMP', 'Full Search']
+psnr_values = [psnr_NNMP, psnr_FS]
+
+plt.bar(labels, psnr_values)
+plt.title('PSNR Comparison')
+plt.xlabel('Algorithm')
+plt.ylabel('PSNR')
+plt.savefig('PSNRComparison.png')
+plt.show()
+
 csvSave('magnitudes.csv',magnitudes)
-
-

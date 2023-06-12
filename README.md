@@ -1,5 +1,3 @@
-Sure, here's how your revised document would look like:
-
 ## Comparison of Full Search and Number of Non-Matching Points Algorithms for Motion Estimation in Video Processing
 
 ### Abstract
@@ -48,11 +46,21 @@ Further analysis on the direction of motion was conducted.
 Figure 4: Direction of Motion
 ![Direction of Motion](DirectionOfMotion.png)
 
+### Image Quality
+To compare the image quality produced by both methods, the Peak Signal-to-Noise Ratio (PSNR) was calculated. The PSNR for the NNMP method was found to be 6.16, while for the Full Search method, it was 6.75. 
+
+Figure 5: PSNR Comparison
+![PSNR Comparison](PSNRComparison.png)
+
+This figure represents the comparison of PSNR values for both Full Search and NNMP algorithms. The higher the PSNR, the better the quality of the compressed or reconstructed image.
+
 ### Discussion
-The observed time efficiency of NNMP can be attributed to its approach of computing a score for each possible motion vector and updating the best motion vector, compared to Full Search's exhaustive search method. Despite the time advantage of NNMP, the varying MSE values suggest a potential trade-off between time efficiency and accuracy of motion estimation.
+The observed time efficiency of NNMP can be attributed to its approach of computing a score for each possible motion vector and updating the best motion vector, compared to Full Search's exhaustive search method. Despite the time advantage of NNMP, the varying MSE values suggest a potential trade-off between time efficiency and accuracy of motion estimation. Additionally, the slightly higher PSNR value for Full Search may
+
+ indicate a better image quality than NNMP, albeit marginally.
 
 ### Conclusion
-The findings underscore the importance of understanding the specific requirements of any given task. While NNMP offers significant time efficiency, the selection between Full Search and NNMP should consider the acceptable trade-offs in terms of motion estimation accuracy.
+The findings underscore the importance of understanding the specific requirements of any given task. While NNMP offers significant time efficiency, the selection between Full Search and NNMP should consider the acceptable trade-offs in terms of motion estimation accuracy and image quality.
 
 ### References
 This section will include references to the foundational works or other relevant studies, if any, that have been referred to in this document.
