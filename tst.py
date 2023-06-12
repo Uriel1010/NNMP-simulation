@@ -103,7 +103,7 @@ motion_vectors_NNMP = []
 motion_vectors_full_search = []
 
 # Process the frames
-for i in range(len(frames)//20 - 1):
+for i in range(len(frames) - 1):
 
     # Convolve the frames with the kernel
     Rf1 = convolve2d(frames[i], K, mode='same')
