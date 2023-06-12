@@ -4,11 +4,40 @@ from scipy.signal import convolve2d
 from itertools import product
 import matplotlib.pyplot as plt
 import csv
+import time
+from sklearn.metrics import mean_squared_error
+
+
+def csvSave(file_path, listName):
+    # Open the file in write mode
+    with open(file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(listName)
+
+    print(f"List {file_path} saved to CSV file successfully.")
+
 
 # Define the kernel
 # The kernel is a 5x5 matrix with 1/25 at indices 1, 4, 8, 12, and 16, and zeros elsewhere.
 # This kernel will be used for convolution with the video frames.
 K = np.ones((5, 5), dtype=np.float32) / 25
+
+def full_search(block, search_area):
+
+    best_match = (0, 0)
+    min_difference = float('inf')
+
+    for y in range(search_area.shape[0] - block.shape[0]):
+        for x in range(search_area.shape[1] - block.shape[1]):
+            candidate_block = search_area[y:y+block.shape[0], x:x+block.shape[1]]
+            difference = np.sum(np.abs(block - candidate_block))
+
+            if difference < min_difference:
+                min_difference = difference
+                best_match = (y, x)
+
+
+    return best_match
 
 
 # Define the Number of Non-Matching Points (NNMP) function
@@ -64,49 +93,88 @@ total_motion = 0
 
 # Initialize a list to store the magnitude of the motion vector for each frame
 magnitudes = []
+NNMP_times = []
+full_search_time = []
+
+# Initialize lists to store motion vectors
+motion_vectors_NNMP = []
+motion_vectors_full_search = []
 
 # Process the frames
-for i in range(len(frames) - 1):
+for i in range(len(frames)//20 - 1):
 
     # Convolve the frames with the kernel
     Rf1 = convolve2d(frames[i], K, mode='same')
     Rf2 = convolve2d(frames[i + 1], K, mode='same')
 
-    # Display the frames
-    # Only display every 10th frame
-    # if i % 10 == 0:
-    #     cv2.imshow('Frame', frames[i])
-    #     cv2.waitKey(500)  # Wait for 500 ms
-
     # Obtain one-bit frames by comparing the original frames to the convolved frames
     G1 = np.where(frames[i] >= Rf1, 1, 0)
     G2 = np.where(frames[i + 1] >= Rf2, 1, 0)
 
+    start_time = time.time()  # Start time measurement
+
     # Apply NNMP to the pair of frames to estimate the motion vector
-    mv = NNMP(G1, G2, M=32, s=4)  # Adjust M and s as needed
+    mv_NNMP = NNMP(G1, G2, M=32, s=4)  # Adjust M and s as needed
+    motion_vectors_NNMP.append(mv_NNMP)
+
+    end_time = time.time()  # End time measurement
+    elapsed_time = end_time - start_time  # Calculate elapsed time
+    NNMP_times.append(elapsed_time)
+    print("Time taken for NNMP: ", elapsed_time, "seconds")
+
 
     # Print the motion vector for each frame
-    # print(f"Frame {i}: Motion vector = {mv}")
+    # print(f"Frame {i}: Motion vector = {mv_NNMP}")
+    try:
+        with open('full_search_time.csv', 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            full_search_time = []
+            for x in reader:
+                full_search_time = [float(num) for num in x]
+    except FileNotFoundError:
+        # If the file does not exist, initialize full_search_time to an empty list
+        # Define block size
+        M = 16
+        # Define search area size
+        s = 8
+        start_time = time.time()  # Start time measurement
+
+        # Split frames into blocks and find motion vectors for each
+        for y in range(0, G1.shape[0], M):
+            for x in range(0, G1.shape[1], M):
+                block = G1[y:y + M, x:x + M]
+                search_area = G2[max(0, y - s):min(G2.shape[0], y + M + s), max(0, x - s):min(G2.shape[1], x + M + s)]
+                mv_full_search = full_search(block, search_area)
+                motion_vectors_full_search.append(mv_full_search)
+
+
+        end_time = time.time()  # End time measurement
+        elapsed_time = end_time - start_time  # Calculate elapsed time
+        full_search_time.append(elapsed_time)
+        print("Time taken for full_search: ", elapsed_time, "seconds")
 
     # Count the number of frames with motion in each direction
-    if mv[0] > 0:
+    if mv_NNMP[0] > 0:
         down_motion += 1
-    elif mv[0] < 0:
+    elif mv_NNMP[0] < 0:
         up_motion += 1
-    if mv[1] > 0:
+    if mv_NNMP[1] > 0:
         right_motion += 1
-    elif mv[1] < 0:
+    elif mv_NNMP[1] < 0:
         left_motion += 1
-    if mv[0] == 0 and mv[1] == 0:
+    if mv_NNMP[0] == 0 and mv_NNMP[1] == 0:
         still_frames += 1
 
     # Calculate the magnitude of the motion vector
-    magnitude = (mv[0] ** 2 + mv[1] ** 2) ** 0.5
+    magnitude = (mv_NNMP[0] ** 2 + mv_NNMP[1] ** 2) ** 0.5
     magnitudes.append(magnitude)
     total_motion += magnitude
 
     # Print the magnitude of motion for each frame
     # print(f"Frame {i}: Magnitude of motion = {magnitude}")
+csvSave('motion_vectors_full_search.csv',motion_vectors_full_search)
+csvSave('full_search_time.csv',full_search_time)
+csvSave('NNMP_times.csv',NNMP_times)
 
 # Create a bar chart for motion directions
 # This bar chart shows the number of frames with motion in each direction.
@@ -132,17 +200,26 @@ print(f"Average magnitude of motion: {total_motion / (len(frames) - 1)}")
 # Print the total and average magnitude of motion
 print(f"Total magnitude of motion: {total_motion}")
 
+MSE_list = []
+for mv_NNMP, mv_full_search in zip(motion_vectors_NNMP, motion_vectors_full_search):
+    mse = mean_squared_error(mv_NNMP, mv_full_search)
+    MSE_list.append(mse)
+csvSave('MSE_list.csv',MSE_list)
+time_diff = np.array(full_search_time) - np.array(NNMP_times)
+plt.plot(range(len(time_diff)), time_diff)
+plt.title('Time Difference Over Frames')
+plt.xlabel('Frame Number')
+plt.ylabel('Time Difference (seconds)')
+plt.show()
 
-# Specify the file path where you want to save the CSV file
-file_path = 'magnitudes.csv'
+plt.plot(range(len(MSE_list)), MSE_list)
+plt.title('MSE Over Frames')
+plt.xlabel('Frame Number')
+plt.ylabel('Mean Squared Error')
+plt.show()
 
-# Open the file in write mode
-with open(file_path, 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(magnitudes)
 
-print("List saved to CSV file successfully.")
-
+csvSave('magnitudes.csv',magnitudes)
 # When done, destroy the windows
 cv2.destroyAllWindows()
 
