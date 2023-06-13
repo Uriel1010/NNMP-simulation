@@ -67,7 +67,7 @@ def NNMP(Bt, Bt1, M, s):
     return best_mv
 
 # Open the video
-cap = cv2.VideoCapture('videos/_import_6140455b6c6fa0.31477371_preview.mp4')
+cap = cv2.VideoCapture('videos/_import_6140455b6c6fa0.31477371.mov')
 print("Frame width: ", cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 print("Frame height: ", cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 print("Frames per second: ", cap.get(cv2.CAP_PROP_FPS))
@@ -260,3 +260,6 @@ plt.savefig('PSNRComparison.png')
 plt.show()
 
 csvSave('magnitudes.csv',magnitudes)
+
+if __name__=="__main__":
+    VideoProcessor
