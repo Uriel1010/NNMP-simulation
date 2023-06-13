@@ -67,8 +67,8 @@ Analysis of the magnitudes of motion indicated a varied distribution of motion e
 Figure 3: Magnitude of Motion Over Time
 ![Magnitude of Motion Over Time](MagnitudeOfMotionOverTime.png)
 
-Average magnitude of motion: 0.13074993635887505
-Total magnitude of motion: 50.992475179961275
+Average magnitude of motion: 0.7028512243146179
+Total magnitude of motion: 274.111977482701
 
 #### Direction of Motion
 Further analysis on the direction of motion was conducted. The direction of motion graph illustrates the prevalent direction of movement in each frame of the video. The direction is usually depicted in degrees (from 
@@ -84,8 +84,8 @@ To compare the image quality produced by both methods, the Peak Signal-to-Noise 
 Figure 5: PSNR Comparison
 ![PSNR Comparison](PSNRComparison.png)
 
-PSNR for NNMP: 6.158794261486969
-PSNR for Full Search: 6.753711955462182
+PSNR for NNMP: 6.224326928101742
+PSNR for Full Search: 6.753617321478811
 
 This figure represents the comparison of PSNR values for both Full Search and NNMP algorithms. The higher the PSNR, the better the quality of the compressed or reconstructed image.
 

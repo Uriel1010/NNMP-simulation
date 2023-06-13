@@ -1,5 +1,5 @@
 import json
-
+from tqdm import tqdm
 import cv2
 import numpy as np
 from scipy.signal import convolve2d
@@ -133,7 +133,10 @@ class VideoProcessor:
         up_motion = 0
         down_motion = 0
         still_frames = 0
-        for i in range(len(self.frames)//20 - 1):
+        # Create a progress bar using tqdm
+        progress_bar = tqdm(total=(len(self.frames) - 1))
+
+        for i in range(len(self.frames) - 1):
             Rf1, Rf2 = self.convolve_frames(i)
             G1, G2 = self.apply_threshold(Rf1, Rf2, i)
 
@@ -161,10 +164,13 @@ class VideoProcessor:
             magnitude = (mv_NNMP[0] ** 2 + mv_NNMP[1] ** 2) ** 0.5
             self.magnitudes.append(magnitude)
             self.total_motion += magnitude
+            progress_bar.update(1)
+
         # Get the average magnitude of motion
         # This is the average magnitude of the motion vectors for all frames.
         average_motion = self.total_motion / (len(self.frames) - 1)
-
+        # Close the progress bar
+        progress_bar.close()
         # Print the average magnitude of motion
         print(f"Average magnitude of motion: {average_motion}")
 
@@ -204,9 +210,16 @@ class VideoProcessor:
 
     def mse_plot(self):
         MSE_list = []
+        # Create a progress bar using tqdm
+        progress_bar = tqdm(total=len(self.motion_vectors_NNMP))
+
         for mv_NNMP, mv_full_search in zip(self.motion_vectors_NNMP, self.motion_vectors_full_search):
             mse = mean_squared_error(mv_NNMP, mv_full_search)
+            # Update the progress bar
+            progress_bar.update(1)
             MSE_list.append(mse)
+        # Close the progress bar
+        progress_bar.close()
         time_diff = np.array(self.full_search_times) - np.array(self.NNMP_times)
         plt.plot(range(len(time_diff)), time_diff)
         plt.title('Time Difference Over Frames')
