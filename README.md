@@ -85,7 +85,7 @@ Figure 5: PSNR Comparison
 ![PSNR Comparison](PSNRComparison.png)
 
 PSNR for NNMP: 6.158794261486969
-PSNR for Full Search: 6.240923737173244
+PSNR for Full Search: 6.753711955462182
 
 This figure represents the comparison of PSNR values for both Full Search and NNMP algorithms. The higher the PSNR, the better the quality of the compressed or reconstructed image.
 

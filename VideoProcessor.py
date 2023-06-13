@@ -24,7 +24,7 @@ class VideoProcessor:
         self.motion_vectors_NNMP = []
         self.motion_vectors_full_search = []
         self.NNMP_times = []
-        self.full_search_time = []
+        self.full_search_times = []
         self.motions = {dir:0 for dir in ['Right', 'Left', 'Up', 'Down', 'Still']}
         self.total_motion = 0
         self.K = np.ones((5, 5), dtype=np.float32) / 25
@@ -80,6 +80,7 @@ class VideoProcessor:
 
     @staticmethod
     def full_search(block, search_area):
+
         best_match = (0, 0)
         min_difference = float('inf')
 
@@ -93,6 +94,20 @@ class VideoProcessor:
                     best_match = (y, x)
 
         return best_match
+
+    @staticmethod
+    def full_searching(G1, G2, M, s):
+        best_match = (0, 0)
+        min_difference = float('inf')
+        motion_vectors_full_search = []
+        for y in range(0, G1.shape[0], M):
+            for x in range(0, G1.shape[1], M):
+                block = G1[y:y + M, x:x + M]
+                search_area = G2[max(0, y - s):min(G2.shape[0], y + M + s), max(0, x - s):min(G2.shape[1], x + M + s)]
+                mv_full_search = VideoProcessor.full_search(block, search_area)
+                motion_vectors_full_search.append(mv_full_search)
+
+        return motion_vectors_full_search
 
     def convolve_frames(self, i):
         Rf1 = convolve2d(self.frames[i], self.K, mode='same')
@@ -118,7 +133,7 @@ class VideoProcessor:
         up_motion = 0
         down_motion = 0
         still_frames = 0
-        for i in range(len(self.frames) - 1):
+        for i in range(len(self.frames)//20 - 1):
             Rf1, Rf2 = self.convolve_frames(i)
             G1, G2 = self.apply_threshold(Rf1, Rf2, i)
 
@@ -126,9 +141,9 @@ class VideoProcessor:
             self.motion_vectors_NNMP.append(mv_NNMP)
             self.NNMP_times.append(NNMP_time)
 
-            mv_full_search, full_search_time = self.time_motion_vector_calculation(self.full_search, G1, G2)
-            self.motion_vectors_full_search.append(mv_full_search)
-            self.full_search_time.append(full_search_time)
+            mv_full_search, full_search_time = self.time_motion_vector_calculation(self.full_searching, G1, G2, 16, 8)
+            self.motion_vectors_full_search += mv_full_search
+            self.full_search_times.append(full_search_time)
 
             # Count the number of frames with motion in each direction
             if mv_NNMP[0] > 0:
@@ -192,7 +207,7 @@ class VideoProcessor:
         for mv_NNMP, mv_full_search in zip(self.motion_vectors_NNMP, self.motion_vectors_full_search):
             mse = mean_squared_error(mv_NNMP, mv_full_search)
             MSE_list.append(mse)
-        time_diff = np.array(self.full_search_time) - np.array(self.NNMP_times)
+        time_diff = np.array(self.full_search_times) - np.array(self.NNMP_times)
         plt.plot(range(len(time_diff)), time_diff)
         plt.title('Time Difference Over Frames')
         plt.xlabel('Frame Number')
@@ -272,4 +287,4 @@ video1.snapshot_first_frame()
 video1.capture_video()
 video1.process_frames()
 video1.plots()
-import valuesUpdateFromJSON.py
+import valuesUpdateFromJSON
