@@ -34,7 +34,7 @@ class VideoProcessor:
         ret, frame = cap.read()
         if ret == True:
             # resize the frame
-            frame = cv2.resize(frame, (640, 480))
+            frame = cv2.resize(frame, (640, 360))
             # save the frame to an image file
             cv2.imwrite('video_first_frame.png', frame)
         cap.release()
