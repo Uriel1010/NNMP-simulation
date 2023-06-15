@@ -26,6 +26,7 @@ class VideoProcessor:
         self.NNMP_times = []
         self.full_search_times = []
         self.motions = {dir:0 for dir in ['Right', 'Left', 'Up', 'Down', 'Still']}
+        self.motions_full = {dir:0 for dir in ['Right', 'Left', 'Up', 'Down', 'Still']}
         self.total_motion = 0
         self.K = np.ones((5, 5), dtype=np.float32) / 25
 
@@ -160,6 +161,18 @@ class VideoProcessor:
             if mv_NNMP[0] == 0 and mv_NNMP[1] == 0:
                 self.motions['Still'] += 1
 
+            # Count the number of frames with motion in each direction
+            if mv_NNMP[0] > 0:
+                self.motions_full['Down'] += 1
+            elif mv_NNMP[0] < 0:
+                self.motions_full['Up'] += 1
+            if mv_NNMP[1] > 0:
+                self.motions_full['Right'] += 1
+            elif mv_NNMP[1] < 0:
+                self.motions_full['Left'] += 1
+            if mv_NNMP[0] == 0 and mv_NNMP[1] == 0:
+                self.motions_full['Still'] += 1
+
             # Calculate the magnitude of the motion vector
             magnitude = (mv_NNMP[0] ** 2 + mv_NNMP[1] ** 2) ** 0.5
             self.magnitudes.append(magnitude)
@@ -179,6 +192,7 @@ class VideoProcessor:
 
         # Save the average and total magnitude of motion to a JSON file
         update_json_file("res.json", {"average_motion": average_motion, "total_motion": self.total_motion})
+        update_json_file("res.json", {"time_percent": (sum(self.full_search_times)/sum(self.NNMP_times))*100})
 
     def plots(self):
         self.motion_plot()
@@ -197,6 +211,7 @@ class VideoProcessor:
         plt.ylabel('Number of Frames')
         plt.savefig('DirectionOfMotion.png')
         plt.show()
+
 
     def motion_magnitude_plot(self):
         # Create a line plot for motion magnitudes
@@ -261,7 +276,7 @@ class VideoProcessor:
         print(f"PSNR for Full Search: {psnr_FS}")
         # Save the average and total magnitude of motion to a JSON file
         update_json_file("res.json", {"PSNR_for_NNMP": psnr_NNMP, "PSNR_for_Full_Search": psnr_FS})
-
+        update_json_file("res.json", {"PSNR_NNMP_vs_FullSearch": (1-psnr_NNMP/psnr_FS)*100})
         # Plotting the comparison
         labels = ['NNMP', 'Full Search']
         psnr_values = [psnr_NNMP, psnr_FS]
@@ -269,7 +284,7 @@ class VideoProcessor:
         plt.bar(labels, psnr_values)
         plt.title('PSNR Comparison')
         plt.xlabel('Algorithm')
-        plt.ylabel('PSNR')
+        plt.ylabel('PSNR [dB]')
         plt.savefig('PSNRComparison.png')
         plt.show()
 
@@ -294,10 +309,11 @@ def csv_save(file_path, list_name):
 
     print(f"List {file_path} saved to CSV file successfully.")
 
-# Using the class:
-video1 = VideoProcessor('videos/_import_6140455b6c6fa0.31477371_preview.mp4')
-video1.snapshot_first_frame()
-video1.capture_video()
-video1.process_frames()
-video1.plots()
-import valuesUpdateFromJSON
+if __name__=="__main__":
+    # Using the class:
+    video1 = VideoProcessor('videos/_import_6140455b6c6fa0.31477371_preview.mp4')
+    video1.snapshot_first_frame()
+    video1.capture_video()
+    video1.process_frames()
+    video1.plots()
+    import valuesUpdateFromJSON

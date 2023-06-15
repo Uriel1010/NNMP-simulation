@@ -55,6 +55,8 @@ The results pointed to a significant time advantage for the NNMP algorithm over 
 Figure 1: Time Difference Over Frames
 ![Time Difference Over Frames](TimeDifferenceOverFrames.png)
 
+The NNMP utilize the time by: 22,210.58% .
+
 #### Accuracy of Motion Estimation
 On comparing the motion vectors produced by both methods, a variance was observed as indicated by the MSE values. The differences in accuracy between the two methods varied per frame.
 
@@ -67,8 +69,9 @@ Analysis of the magnitudes of motion indicated a varied distribution of motion e
 Figure 3: Magnitude of Motion Over Time
 ![Magnitude of Motion Over Time](MagnitudeOfMotionOverTime.png)
 
-Average magnitude of motion: 0.7028512243146179
-Total magnitude of motion: 274.111977482701
+Average magnitude of motion: 0.70
+
+Total magnitude of motion: 274.11
 
 #### Direction of Motion
 Further analysis on the direction of motion was conducted. The direction of motion graph illustrates the prevalent direction of movement in each frame of the video. The direction is usually depicted in degrees (from 
@@ -84,8 +87,11 @@ To compare the image quality produced by both methods, the Peak Signal-to-Noise 
 Figure 5: PSNR Comparison
 ![PSNR Comparison](PSNRComparison.png)
 
-PSNR for NNMP: 6.224326928101742
-PSNR for Full Search: 6.753617321478811
+PSNR for NNMP: 6.22
+
+PSNR for Full Search: 6.75
+
+The marginal loss between NNMP and Full Search is 7.84% in Peak-Signal-to-Noise ratio (PSNR).
 
 This figure represents the comparison of PSNR values for both Full Search and NNMP algorithms. The higher the PSNR, the better the quality of the compressed or reconstructed image.
 

@@ -1,1 +1,1 @@
-{"average_motion": 0.7028512243146179, "total_motion": 274.111977482701, "PSNR_for_NNMP": 6.224326928101742, "PSNR_for_Full_Search": 6.753617321478811, "width": 1280.0, "height": 720.0, "fps": 60.0, "numFrames": 391.0}
+{"average_motion": 0.7028512243146179, "total_motion": 274.111977482701, "PSNR_for_NNMP": 6.224326928101742, "PSNR_for_Full_Search": 6.753617321478811, "width": 1280.0, "height": 720.0, "fps": 60.0, "numFrames": 391.0, "PSNR_NNMP_vs_FullSearch": 7.837139242310121, "time_percent": 22210.58059879015}
